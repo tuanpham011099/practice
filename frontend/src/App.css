@@ -1,0 +1,17 @@
+.quantityInput {
+    padding: 5px 0px;
+    box-sizing: border-box;
+    outline: none;
+    border-bottom: 1px solid #9f9f9f;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    margin: 2px;
+    background: transparent;
+}
+
+.quantityInput::-webkit-inner-spin-button,
+.quantityInput::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

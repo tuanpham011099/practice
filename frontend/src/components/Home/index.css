@@ -1,0 +1,18 @@
+.selectBox {
+    outline: none;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 2px;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    background: transparent;
+}
+
+.selectBox::-ms-expand {
+    display: none;
+}
+
+.selectBox:focus {
+    outline: none;
+}

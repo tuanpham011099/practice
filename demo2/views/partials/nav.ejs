@@ -1,0 +1,79 @@
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js " integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo " crossorigin="anonymous "></script>
+
+<nav id="navbar-header" class="navbar navbar-expand-lg bg-secondary">
+    <div class="container">
+        <a class="navbar-brand navbar-brand-center d-flex align-items-center p-0 only-mobile" href="/admin">
+            <img width="50px" height="50px" src="https://i1.sndcdn.com/artworks-000225096653-9ev2hh-t500x500.jpg" alt="">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="lnr lnr-menu"></span>
+                </button>
+        <div class="collapse navbar-collapse justify-content-between w-100" id="navbarSupportedContent">
+            <ul class="nav d-flex justify-content-between">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">  Pages  </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" id="product" href="/admin/products" style="cursor: pointer;"> Product </a></li>
+                        <li><span class="dropdown-item"> Category &raquo </span>
+                            <ul class="submenu dropdown-menu">
+                                <%for(let i =0;i < categories.length;i++){%>
+                                    <li>
+                                        <a class="dropdown-item" style="cursor: pointer;" id="<%=categories[i].id%>" href="/admin/categories/<%=categories[i].id%>">
+                                            <%=categories[i].name%> <img src="<%=categories[i].thumbnail%>" width="20px" height="20px" alt="">
+                                        </a>
+                                        <p>
+                                            <%=categories[i].totalProducts%>
+                                        </p>
+                                    </li>
+                                    <%}%>
+                            </ul>
+                        </li>
+                        <li><a href="/admin/orders" class="dropdown-item " id="order" style="cursor: pointer;"> Order </a></li>
+                        <li><a class="dropdown-item " href="/admin/users"> Users </a>
+                    </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">  Methods </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" id="product" href="/admin/addCategory" style="cursor: pointer;">Add Category</a></li>
+                            <li> <a class="dropdown-item" id="product" href="/admin/addProduct" style="cursor: pointer;">Add Product</a></li>
+                        </ul>
+                    </li>
+            </ul>
+            <div class="nav d-flex flex-lg-row flex-column ">
+                <li class="nav-item ">
+                    <div class="input-group " id="search-box ">
+                        <input class="form-control py-2 border-right-0 border " type="search " id="search-input ">
+                        <span class="input-group-append ">
+                <div class="input-group-text bg-transparent " style="cursor: pointer; " id="click-search "><i class="fa fa-search "></i></div></span>
+                    </div>
+                </li>
+
+                <li class="nav-item ">
+                    <a class="btn" href="/admin/profile" style="color:black;border: 1px solid #e0e0e0; ">
+                        <%=user.fullName%>
+                    </a>
+                </li>
+                <li class="nav-item ">
+                    <a class="btn " href="/admin/logout " style="border: 1px solid rgb(146, 145, 145); "><i class="fas fa-sign-out-alt "></i></a>
+                </li>
+            </div>
+        </div>
+    </div>
+</nav>
+<script>
+    $(document).on('click', '.dropdown-menu', function(e) {
+        e.stopPropagation();
+    });
+    if ($(window).width() < 992) {
+        $('.dropdown-menu a').click(function(e) {
+            e.preventDefault();
+            if ($(this).next('.submenu').length) {
+                $(this).next('.submenu').toggle();
+            }
+            $('.dropdown').on('hide.bs.dropdown', function() {
+                $(this).find('.submenu').hide();
+            })
+        });
+    }
+</script>

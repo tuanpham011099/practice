@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Admin</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer"
+    />
+    <style>
+        @media (min-width: 992px) {
+            .dropdown-menu .dropdown-toggle:after {
+                border-top: .3em solid transparent;
+                border-right: 0;
+                border-bottom: .3em solid transparent;
+                border-left: .3em solid;
+            }
+            .dropdown-menu .dropdown-menu {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .dropdown-menu li {
+                position: relative;
+            }
+            .nav-item .submenu {
+                display: none;
+                position: absolute;
+                left: 100%;
+                top: -7px;
+            }
+            .nav-item .submenu-left {
+                right: 100%;
+                left: auto;
+            }
+            .dropdown-menu>li:hover {
+                background-color: #f1f1f1
+            }
+            .dropdown-menu>li:hover>.submenu {
+                display: block;
+            }
+        }
+        
+        .box {
+            padding: 10px;
+            border: 3px solid #c1bdbd;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+            margin: auto;
+            text-align: center;
+            font-family: arial;
+        }
+        
+        .price {
+            color: grey;
+            font-size: 22px;
+        }
+        
+        .card button {
+            border: none;
+            outline: 0;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+        }
+        
+        .card button.edit {
+            color: white;
+            background-color: rgb(57, 60, 248);
+        }
+        
+        .card button.delete {
+            color: white;
+            background-color: rgb(235, 27, 27);
+        }
+        
+        .card button:hover {
+            opacity: 0.7;
+        }
+    </style>
+    <script>
+        let a = '<%=categories%>'
+        console.log(a[2].b);
+    </script>
+</head>
+
+<body>
+    <%- include('partials/nav',user,categories)%>
+        <div class="container my-5">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="">Name</label>
+                        <input type="text" name="name" id="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Description</label>
+                        <input type="text" name="description" id="description" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Thumbnail</label>
+                        <input type="file" name="thumbnail" id="thumbnail" class="form-control" required>
+                    </div>
+                    <button class="btn btn-primary mx-auto" onclick="addCategory()">Add</button>
+                    <div class="form-group my-2" style="border: 1px solid rgb(197, 197, 197);">
+                        <img alt="" id="preview" width="200px" style="object-fit: fill;">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Thumbnail</th>
+                                <th>Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%for(let i = 0 ; i < categories.length ; i ++){%>
+                                <tr>
+                                    <td>
+                                        <a href="/admin/categories/<%=categories[i].id%>">
+                                            <%=categories[i].name%>
+                                        </a>
+                                    </td>
+                                    <td><img src="<%=categories[i].thumbnail%>" width="50px" alt=""></td>
+                                    <td>
+                                        <%=categories[i].description%>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-primary" href="/admin/category/<%=categories[i].id%>">Edit</a>
+                                        <button class="btn btn-danger" onclick="deleteCategory('<%=categories[i].id%>')">Delete</button>
+                                </tr>
+
+                                <%}%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js " integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1 " crossorigin="anonymous "></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js " integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM " crossorigin="anonymous "></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            function addCategory() {
+                let name = document.getElementById('name').value;
+                let description = document.getElementById('description').value;
+                let thumbnail = document.getElementById('thumbnail').files[0];
+                let formData = new FormData();
+                formData.append('name', name);
+                formData.append('description', description);
+                formData.append('thumbnail', thumbnail);
+                axios.post('/admin/addCategory', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
+                    .then(function(response) {
+                        if (response.data.status == 200) {
+                            Swal.fire({
+                                title: 'Success',
+                                text: 'Add category success',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(function() {
+                                window.location.href = '/admin/categories';
+                            })
+                        } else
+                            Swal.fire({
+                                title: 'Error',
+                                text: response.data.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            })
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    })
+            }
+
+            function deleteCategory(id) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.value) {
+                        axios.delete('/admin/deleteCategory/' + id)
+                            .then(function(response) {
+                                if (response.data.status == 200) {
+                                    Swal.fire({
+                                        title: 'Success',
+                                        text: 'Delete category success',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK'
+                                    }).then(function() {
+                                        window.location.href = '/admin/addCategory';
+                                    })
+                                } else
+                                    Swal.fire({
+                                        title: 'Error',
+                                        text: response.data.message,
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    })
+                            })
+                            .catch(function(error) {
+                                console.log(error);
+                            })
+                    }
+                })
+            }
+
+            const thumbnail = document.getElementById('thumbnail');
+            thumbnail.onchange = function(event) {
+                document.getElementById('preview').src = URL.createObjectURL(event.target.files[0]);
+            };
+            document.getElementById('preview').onload = function() {
+                URL.revokeObjectURL(this.src);
+            }
+        </script>
+</body>
+
+</html>

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Admin</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer"
+    />
+    <style>
+        @media (min-width: 992px) {
+            .dropdown-menu .dropdown-toggle:after {
+                border-top: .3em solid transparent;
+                border-right: 0;
+                border-bottom: .3em solid transparent;
+                border-left: .3em solid;
+            }
+            .dropdown-menu .dropdown-menu {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .dropdown-menu li {
+                position: relative;
+            }
+            .nav-item .submenu {
+                display: none;
+                position: absolute;
+                left: 100%;
+                top: -7px;
+            }
+            .nav-item .submenu-left {
+                right: 100%;
+                left: auto;
+            }
+            .dropdown-menu>li:hover {
+                background-color: #f1f1f1
+            }
+            .dropdown-menu>li:hover>.submenu {
+                display: block;
+            }
+        }
+        
+        .box {
+            padding: 10px;
+            border: 1px solid #c1bdbd;
+            border-radius: 15px 50px;
+            width: 100%;
+            height: 100%;
+            box-shadow: 0px 0px 10px -4px rgba(0, 0, 0, 0.75);
+        }
+        
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+            margin: auto;
+            text-align: center;
+            font-family: arial;
+        }
+        
+        .price {
+            color: grey;
+            font-size: 22px;
+        }
+        
+        .card button {
+            border: none;
+            outline: 0;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+        }
+        
+        .card button.edit {
+            color: white;
+            background-color: rgb(57, 60, 248);
+        }
+        
+        .card button.delete {
+            color: white;
+            background-color: rgb(235, 27, 27);
+        }
+        
+        .card button:hover {
+            opacity: 0.7;
+        }
+    </style>
+    <script>
+    </script>
+</head>
+
+<body>
+    <%- include('partials/nav',user,categories)%>
+        <div class="container my-5">
+            <%for(let i = 0 ; i < orders.length ; i ++){%>
+                <div class="row box my-2">
+                    <div style="justify-content: space-between;">
+                        <p>Name:
+                            <%=orders[i].fullName%>
+                        </p>
+                        <p>Email:
+                            <%=orders[i].email%>
+                        </p>
+                        <p>Addr:
+                            <%=orders[i].address%>
+                        </p>
+                        <p>Phone:
+                            <%=orders[i].phone%>
+                        </p>
+                    </div>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr style="background-color: #c1bdbd;">
+                                <th>Name</th>
+                                <th>quantity</th>
+                                <th>price</th>
+                                <th>total price</th>
+                                <th>status</th>
+                                <th>completed day</th>
+                                <th>order day</th>
+                                <th>payment</th>
+                                <th>action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%for(let j=0; j< orders[i].orders.products.length;j++){%>
+                                <tr>
+                                    <td>
+                                        <%=orders[i].orders.products[j].details.name%>
+                                    </td>
+                                    <td>
+                                        <%=orders[i].orders.products[j].quantity%>
+                                    </td>
+                                    <td>
+                                        <%=orders[i].orders.products[j].details.price%>
+                                    </td>
+                                    <td>
+                                        <%=orders[i].orders.products[j].total%>
+                                    </td>
+                                    <td>
+                                        <%=orders[i].orders.status%>
+                                    </td>
+                                    <td>
+                                        <%=orders[i].orders.completedDay%>
+                                    </td>
+                                    <td>
+                                        <%=orders[i].orders.orderDay%>
+                                    </td>
+                                    <td>
+                                        <%=orders[i].orders.payment%>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-warning" onclick="changeOrder('<%=orders[i].orders.orderId%>','<%=orders[i].orders.status%>')">Change</button>
+                                    </td>
+                                </tr>
+                                <%}%>
+                        </tbody>
+                    </table>
+                </div>
+                <%}%>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js " integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1 " crossorigin="anonymous "></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js " integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM " crossorigin="anonymous "></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+        <script>
+            function changeOrder(id, status) {
+                axios.patch('/admin/order/' + id, {
+                    status
+                }).then(function(response) {
+                    window.location.reload();
+                }).catch(function(error) {
+                    console.log(error);
+                });
+                console.log(id, status);
+            }
+        </script>
+</body>
+
+</html>

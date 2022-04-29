@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Admin</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer"
+    />
+    <style>
+        @media (min-width: 992px) {
+            .dropdown-menu .dropdown-toggle:after {
+                border-top: .3em solid transparent;
+                border-right: 0;
+                border-bottom: .3em solid transparent;
+                border-left: .3em solid;
+            }
+            .dropdown-menu .dropdown-menu {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .dropdown-menu li {
+                position: relative;
+            }
+            .nav-item .submenu {
+                display: none;
+                position: absolute;
+                left: 100%;
+                top: -7px;
+            }
+            .nav-item .submenu-left {
+                right: 100%;
+                left: auto;
+            }
+            .dropdown-menu>li:hover {
+                background-color: #f1f1f1
+            }
+            .dropdown-menu>li:hover>.submenu {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/nav',user,categories)%>
+        <div class="container my-5">
+            <div class="row">
+                <div class="col-md-6 offset-md-4">
+                    <div class="card" style="width:300px;height: 300px;">
+                        <img class="card-img-top" src="<%=user.avatar%>" alt="Card image" style="width:100%;border: 1px solid rgb(209, 209, 209);border-radius: 50%;">
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                Name:
+                                <%=user.fullName%>
+                            </h4>
+                            <p class="card-text">
+                                Email:
+                                <%=user.email%>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">
+                            Address: <%=user.address%>
+                            Phone: <%=user.phone%>
+                        </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js " integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1 " crossorigin="anonymous "></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js " integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM " crossorigin="anonymous "></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+</body>
+
+</html>
