@@ -105,6 +105,10 @@
                             <label for="">Description</label>
                             <input type="text" class="form-control" value="<%=product.description%>" id="description">
                         </div>
+                        <div class="form-group">
+                            <label for="">Quantity</label>
+                            <input type="text" class="form-control" value="<%=product.amount%>" id="amount">
+                        </div>
                         <p><button class="delete" onclick="updateProduct()">Update</button></p>
                         <div class="card-footer">
                         </div>
@@ -160,6 +164,7 @@
                 const price = _('#price');
                 const description = _('#description');
                 const files = _('#images');
+                const amount=_('#amount')
 
                 function changeDefault(productId, imgId) {
                     axios.patch('/admin/products/' + productId + '/images/' + imgId)
@@ -183,7 +188,8 @@
                     axios.put('/admin/products/' + '<%=product.id%>', {
                             name: name.value,
                             price: price.value,
-                            description: description.value
+                            description: description.value,
+                            amount:amount.value
                         })
                         .then(res => {
                             Swal.fire({

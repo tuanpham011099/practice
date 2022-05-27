@@ -75,7 +75,8 @@ const Admin = (app) => {
     });
 
     app.get('/admin/products', async(req, res) => {
-        if (!req.isAuthenticated()) return res.redirect('/admin/login');
+        if (!req.isAuthenticated())
+            return res.redirect('/admin/login');
         let categoryName = req.query.category || ' ';
         const categories = await Category.findAll({
             attributes: [
@@ -95,15 +96,17 @@ const Admin = (app) => {
             group: ['Category.id']
         });
         Product.findAll({
-                include: [{
-                    model: Category,
-                    as: 'categories',
-                    attributes: ['id', 'name'],
-                    through: {
-                        attributes: []
-                    },
-                }, { model: productImg, as: 'images', attributes: ['href', 'is_default'] }]
-            }).then(result => res.render('product', { products: result, user: req.user, categories: categories }))
+            include: [{
+                model: Category,
+                as: 'categories',
+                attributes: ['id', 'name'],
+                through: {
+                    attributes: []
+                },
+            }, { model: productImg, as: 'images', attributes: ['href', 'is_default'] }]
+        }).then(result =>
+           { console.log(result);
+            res.render('product', { products: result, user: req.user, categories: categories })})
             .catch(error => console.log(error));
 
     });
@@ -252,12 +255,12 @@ const Admin = (app) => {
 
     app.put('/admin/products/:id', async(req, res) => {
         const { id } = req.params;
-        const { name, price, description } = req.body;
-        if (!name || !price || !description) res.send({ status: 400, message: 'Missing data' });
+        const { name, price, description,amount } = req.body;
+        if (!name || !price || !description || !amount) res.send({ status: 400, message: 'Missing data' });
         const product = await Product.findByPk(id);
         if (!product) res.send({ status: 404, message: 'Product not found' });
         try {
-            product.set({ name, price, description });
+            product.set({ name, price, description, amount });
             await product.save();
             res.send({ status: 200, message: 'Product updated' });
         } catch (error) {

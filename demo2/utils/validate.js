@@ -2,13 +2,19 @@ const Joi = require("joi");
 const moment = require('moment');
 const { DAY_FORMAT } = require('./keyword');
 
+/**
+ * 
+ * @param  {...any} theArgs string[]
+ * @returns array of missing properties
+ */
 exports.missingData = (...theArgs) => {
     let a = {};
     theArgs.forEach(element => {
         a[element] = 'required';
-    })
+    });
     return a;
 };
+
 
 exports.validatePassword = (password) => {
     return password.match(
@@ -16,8 +22,8 @@ exports.validatePassword = (password) => {
     );
 };
 exports.formatDay = (day) => {
-    return moment(day, DAY_FORMAT).utc(true).toDate()
-}
+    return moment(day, DAY_FORMAT).utc(true).toDate();
+};
 
 exports.userSchema = Joi.object({
     email: Joi.string()

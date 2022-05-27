@@ -2,7 +2,7 @@ const { Category, Product, sequelize, productImg } = require('../models');
 const { uploadImg } = require('../utils/uploadImg');
 const { missingData } = require('../utils/validate');
 
-exports.create = async(req, res) => {
+exports.create = async (req, res) => {
     const { name, description } = req.body;
     if (!name || !description)
         return res.status(400).json({ msg: 'Data missing', errors: missingData('name', 'description') });
@@ -11,11 +11,13 @@ exports.create = async(req, res) => {
     if (ctgFind) return res.status(400).json({ msg: 'Category already exists' });
     if (!req.file) return res.status(400).json({ msg: 'No image uploaded' });
     let img;
+
     try {
         img = await uploadImg(req.file.path);
     } catch (error) {
         return res.status(400).json(error);
     }
+
     try {
         const result = await Category.create({ name, description, thumbnail: img });
         res.status(201).json({ msg: `Category ${name} Added`, result });
@@ -27,31 +29,33 @@ exports.create = async(req, res) => {
 exports.listAllCtg = (req, res) => {
     const name = req.query.name || 'DESC';
     const product = req.query.product || 'ASC';
+
     Category.findAll({
-            attributes: [
-                'id',
-                'name',
-                'thumbnail',
-                'description', [sequelize.fn('SUM', sequelize.col('Products.amount')), 'totalProducts'],
-            ],
-            include: [{
-                model: Product,
-                as: 'products',
-                through: {
-                    attributes: []
-                },
+        attributes: [
+            'id',
+            'name',
+            'thumbnail',
+            'description',
+            [sequelize.fn('SUM', sequelize.col('Products.amount')), 'totalProducts'],
+        ],
+        include: [{
+            model: Product,
+            as: 'products',
+            through: {
                 attributes: []
-            }],
-            group: ['Category.id'],
-            order: [
-                ['name', name],
-                [sequelize.col('totalProducts'), product]
-            ],
-        }).then(results => res.status(200).json(results))
-        .catch(error => res.status(400).json(error))
+            },
+            attributes: []
+        }],
+        group: ['Category.id'],
+        order: [
+            ['name', name],
+            [sequelize.col('totalProducts'), product]
+        ],
+    }).then(results => res.status(200).json(results))
+        .catch(error => res.status(400).json(error));
 };
 
-exports.ctgDetail = async(req, res) => {
+exports.ctgDetail = async (req, res) => {
     const { ctgId } = req.params;
     try {
         const result = await Category.findOne({
@@ -65,24 +69,26 @@ exports.ctgDetail = async(req, res) => {
                 include: [{ model: productImg, as: 'images', attributes: ['href', 'is_default'] }]
             }]
         });
-        res.status(200).json(result)
+        res.status(200).json(result);
     } catch (error) {
-        res.status(400).json(error)
+        res.status(400).json(error);
     }
-}
+};
 
-exports.updateCtg = async(req, res) => {
+exports.updateCtg = async (req, res) => {
     const { id } = req.params;
     const { name, description } = req.body;
     if (!name || !description)
         return res.status(400).json({ msg: 'Data missing', errors: missingData('name', 'description') });
     if (!req.file) return res.status(400).json({ msg: 'No image uploaded' });
+
     let img;
     try {
         img = await uploadImg(req.file.path);
     } catch (error) {
         return res.status(400).json(error);
     }
+
     try {
         await Category.update({ name, description, thumbnail: img }, { where: { id } });
         res.status(200).json({ msg: `Category ${name} Updated` });
@@ -91,7 +97,7 @@ exports.updateCtg = async(req, res) => {
     }
 };
 
-exports.deleteCtg = async(req, res) => {
+exports.deleteCtg = async (req, res) => {
     const { id } = req.params;
     try {
         const result = await Category.findByPk(id, {

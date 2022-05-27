@@ -123,9 +123,9 @@
             }).then(function(response) {
                 if (response.data.status == 200) {
                     Swal.fire({
-                        title: title,
-                        text: text,
-                        icon: icon,
+                        title: 'asdasd',
+                        text: "dasdasd",
+                        icon: 'success',
                         confirmButtonText: 'OK'
                     }).then(function() {
                         window.close();
@@ -134,6 +134,7 @@
                     fire('Error', response.data.message, 'error');
                 }
             }).catch(error => {
+                console.log(error);
                 fire('Error', 'something went wrong', 'error');
             });
         };

@@ -15,6 +15,7 @@ const auth = async(req, res, next) => {
     });
 
 };
+
 const isAdmin = (req, res, next) => {
     if (!req.client.role === ROLE_USER) return res.status(403).json({ msg: "Not allow" });
     next();

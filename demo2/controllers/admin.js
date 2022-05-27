@@ -40,7 +40,7 @@ exports.banUser = async(req, res) => {
 
 exports.deleteUser = async(req, res) => {
     const { userId } = req.params;
-    const result = await User.findOne({ where: { id: userId, role: ROLE_USER } });
+    const result = await User.findOne({ where: { id: userId, role: ROLE_USER, isActive: false } });
     if (!result) return res.status(404).json({ msg: 'User not found' });
     try {
         await result.destroy();

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { createProduct, deleteProduct, listAllProduct, updateProduct, productDetails, pickDefaultImg } = require('../controllers/product');
-const { auth } = require('../middlewares/auth');
+const { auth, isAdmin } = require('../middlewares/auth');
 
 router.get('/', listAllProduct);
 router.get('/:productId', productDetails);
