@@ -3,14 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-function Profile(props) {
+function Profile() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [user, setUser] = useState();
     const [orders, setOrders] = useState();
     const [selectedFile, setSelectedFile] = useState();
     const [date, setDate] = useState('ASC');
-    const [detail, setDetail] = useState();
+    const [detail, setDetail] = useState([]);
     const [orderId, setOrderId] = useState();
 
     if (!localStorage.getItem('user')) {
@@ -47,7 +47,6 @@ function Profile(props) {
 
     useEffect(() => {
         fetchOrder(orderId);
-        console.log(detail);
     }, [orderId]);
 
 
@@ -115,7 +114,7 @@ function Profile(props) {
                             detail && <div className='w-100'>
                                 <h5>Order ID:  <span style={{ color: 'red' }}>{detail.orderId}</span> </h5>
                                 <h5>Payment:  <span style={{ color: 'red' }}>{detail.payment}</span> </h5>
-                                <h5> Day of Order: <span style={{ color: 'red' }}>  {detail.orderDay.split('T')[0]}</span> </h5>
+                                <h5> Day of Order: <span style={{ color: 'red' }}>  {detail.orderDay&&detail.orderDay.split('T')[0]}</span> </h5>
                                 <h5>Completed:  <span style={{ color: 'red' }}>{detail.completedDay ? detail.completedDay.split('T')[0] : 'Not yet completed'}</span>
                                 </h5>
                                 <h5>Total: <span style={{ color: 'red' }}>  $ {detail.totalPrice}</span> </h5>
@@ -133,27 +132,30 @@ function Profile(props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {detail && detail.products.map(product =>
-                                    <tr key={product.id}  >
-                                        <td>{product.images && <img width={'50px'} height={'50px'} src={product.images[0].href} />}</td>
-                                        <td>{product.name}</td>
-                                        <td>{product.description}</td>
-                                        <td>${product.price}</td>
-                                        <td>{product.quantity}</td>
-                                        <td>$ {product.total}</td>
-                                        <td ><Link style={{ margin: '5px 25px' }} to={`/product/${product.name}-${product.id}`} className="btn btn-success">Detail</Link></td>
-                                    </tr>
-                                )}
+                                {
+                                    detail.products && detail.products.map(product =>
+                                        <Details product={product} key={product.id} />
+                                    )
+                                }
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-
         </>
-
-
     );
+}
+
+function Details({product}) {
+    return <tr >
+        <td>{product.images && <img width={'50px'} height={'50px'} src={product.images[0].href} />}</td>
+        <td>{product.name}</td>
+        <td>{product.description}</td>
+        <td>${product.price}</td>
+        <td>{product.quantity}</td>
+        <td>$ {product.total}</td>
+        <td ><Link style={{ margin: '5px 25px' }} to={`/product/${product.name}-${product.id}`} className="btn btn-success">Detail</Link></td>
+    </tr>;
 }
 
 export default Profile;

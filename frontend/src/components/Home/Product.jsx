@@ -14,7 +14,10 @@ function Product({ product }) {
         if (localStorage.getItem('user')) {
             TOKEN = JSON.parse(localStorage.getItem('user')).token;
             axios({ url: `http://localhost:5000/carts/add/${id}`, data: { quantity: 1 }, method: 'post', headers: { 'authorization': `Bearer ${TOKEN}` } })
-                .then((res) => Swal.fire({ icon: 'success', text: res.data.msg })).catch(error => Swal.fire({ icon: 'error', text: 'Something wrong' }));
+                .then((res) =>
+                    Swal.fire({ icon: 'success', text: res.data.msg })
+                    .then(() => window.location.reload()))
+                .catch(error => Swal.fire({ icon: 'error', text: 'Something wrong' }));
         } else {
             navigate('/login');
         }

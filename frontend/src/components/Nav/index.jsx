@@ -9,7 +9,6 @@ function Nav({ cart, setQ }) {
     const [user, setUser] = useState();
 
     useEffect(() => {
-        console.log(cart);
         setUser(JSON.parse(localStorage.getItem('user')));
         axios.get('http://localhost:5000/categories')
             .then(res => setCategories(res.data))

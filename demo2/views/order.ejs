@@ -134,7 +134,7 @@
                                         <%=orders[i].orders.products[j].quantity%>
                                     </td>
                                     <td>
-                                        <%=orders[i].orders.products[j].details.price%>
+                                        <%=orders[i].orders.products[j].price%>
                                     </td>
                                     <td>
                                         <%=orders[i].orders.products[j].total%>
@@ -152,7 +152,11 @@
                                         <%=orders[i].orders.payment%>
                                     </td>
                                     <td>
-                                        <button class="btn btn-warning" onclick="changeOrder('<%=orders[i].orders.orderId%>','<%=orders[i].orders.status%>')">Change</button>
+                                        <%if(orders[i].orders.status=='completed'){%>
+                                            <button class="btn btn-outline-secondary" disabled>Accepted</button>
+                                        <%}else{%>
+                                            <button class="btn btn-warning" onclick="changeOrder('<%=orders[i].orders.orderId%>','<%=orders[i].orders.status%>')">Change</button>
+                                        <%}%>
                                     </td>
                                 </tr>
                                 <%}%>
@@ -170,11 +174,15 @@
                 axios.patch('/admin/order/' + id, {
                     status
                 }).then(function(response) {
-                    window.location.reload();
+                    if(response.data.status===200){
+                        alert(response.data.message);
+                        location.reload();
+                    }
+                    else
+                      alert(response.data.message);
                 }).catch(function(error) {
                     console.log(error);
                 });
-                console.log(id, status);
             }
         </script>
 </body>

@@ -7,7 +7,7 @@ function Cart({ cart, setCart }) {
 
     const [payment, setPayment] = useState('cash');
 
-
+console.log(cart)
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -45,7 +45,7 @@ function Cart({ cart, setCart }) {
                                 </tbody>
                             </table>
                             <div className="justify-content-right">
-                                <div className="font-weight-normal m-0">Total price: <h4>${cart.products && cart.products.reduce((acc, curr) => acc + curr.total, 0)}</h4></div>
+                                <div className="font-weight-normal m-0">Total price: <h4>${cart.products && cart.products.reduce((acc, curr) => acc + curr.totalPrice, 0)}</h4></div>
                             </div>
                         </div>
                     </div>

@@ -114,7 +114,7 @@
                     </div>
                     <div class="form-group">
                         <label for="">Images</label>
-                        <input type="file" multiple name="images" id="images" class="form-control">
+                        <input type="file" multiple name="images" accept="image/*" id="images" class="form-control">
                     </div>
                     <div class="form-group">
                         <label for="">Categories</label><br>
@@ -181,14 +181,23 @@
             function deleteProduct(id) {
                 axios.delete('/admin/product/' + id)
                     .then(function(response) {
-                        if (response.data.status == 200)
-                            Swal.fire({
+                        if (response.data.status == 200) {
+                                Swal.fire({
                                 title: 'Deleted!',
-                                text: 'Your file has been deleted.',
-                                type: 'success',
+                                text: response.data.message,
+                                icon: 'success',
                                 confirmButtonText: 'Cool'
+                            }).then(()=>{
+                                location.reload();
                             })
-                        location.reload();
+                        }else{
+                            Swal.fire({
+                                title: 'Something went wrong',
+                                text: response.data.message,
+                                icon: 'error',
+                                confirmButtonText: ' Not cool'
+                            })
+                        }
                     })
                     .catch(function(error) {
                         console.log(error);
@@ -223,7 +232,7 @@
                             Swal.fire({
                                 title: 'Added!',
                                 text: 'Product Added',
-                                type: 'success',
+                                icon: 'success',
                                 confirmButtonText: 'Cool'
                             }).then(() => {
                                 location.reload();
@@ -231,7 +240,7 @@
                         else Swal.fire({
                             title: 'Error',
                             text: 'Something went wrong',
-                            type: 'error',
+                            icon: 'error',
                             confirmButtonText: 'Not cool!'
                         })
                     })

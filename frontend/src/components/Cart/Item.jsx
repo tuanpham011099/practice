@@ -9,7 +9,6 @@ function Item({ product, cartId, setCart }) {
     const TOKEN = JSON.parse(localStorage.getItem('user')).token;
 
 
-
     const updateCart = (id, quantity) => {
         setAmount(quantity);
         axios.post(`http://localhost:5000/carts/add/${id}`, { quantity }, {
@@ -18,6 +17,9 @@ function Item({ product, cartId, setCart }) {
             }
         })
             .then(res => {
+                if (res.data.status === 400) {
+                   return Swal.fire({icon:'error',text:res.data.message})
+               }
                 fetchCart();
             })
             .catch(error => console.log(error));
@@ -56,7 +58,7 @@ function Item({ product, cartId, setCart }) {
             <td style={{ display: 'flex' }}>
                 <input type="number" min={1} style={{ display: 'inline', padding: '0' }} className="form-control abc" value={quantity} onChange={(e) => updateCart(product.productId, e.target.value)} />
             </td>
-            <td className="text-right font-weight-semibold align-middle">${product.total}</td>
+            <td className="text-right font-weight-semibold align-middle">${product.totalPrice}</td>
             <td className="text-center align-middle px-0"><a href="#" className="shop-tooltip close float-none text-danger" data-original-title="Remove" onClick={removeFromCart} >×</a></td>
         </tr>
     );

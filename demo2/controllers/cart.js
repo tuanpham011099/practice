@@ -8,7 +8,7 @@ exports.addToCart = async (req, res) => {
         const result = await Product.findByPk(productId);
         if (!result) return res.status(404).json({ msg: 'Product not found' });
         if (quantity > result.amount) {
-            return res.status(200).json({ msg: 'Product quantity exceed' });
+            return res.send({ status: 400, message: 'Product quantity exceed' });
         }
         let cartItem = await Cart.findOne({ where: { userId } });
         if (!cartItem) {

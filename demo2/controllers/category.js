@@ -109,8 +109,10 @@ exports.deleteCtg = async (req, res) => {
                 }
             }]
         });
-        if (!result) return res.status(404).json({ msg: 'Category not found' });
-        if (result.products.length > 0) return res.status(400).json({ msg: 'Category has products' });
+        if (!result)
+            return res.status(404).json({ msg: 'Category not found' });
+        if (result.products.length > 0)
+            return res.status(400).json({ msg: 'Category has products' });
         await result.destroy();
     } catch (error) {
         console.log(error);

@@ -6,8 +6,8 @@ const { PENDING_PAYMENT } = require('../utils/keyword');
 module.exports = (sequelize, DataTypes) => {
     class productInOrder extends Model {
         static associate(models) {
-            this.belongsTo(models.Product, { foreignKey: 'productId', as: 'details' })
-            this.belongsTo(models.Order, { foreignKey: 'id', as: 'orders' })
+            this.belongsTo(models.Product, { foreignKey: 'productId', as: 'details' });
+            this.belongsTo(models.Order, { foreignKey: 'id', as: 'orders' });
         }
     }
     productInOrder.init({
@@ -28,6 +28,10 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         quantity: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        price: {
             type: DataTypes.INTEGER,
             allowNull: false
         },

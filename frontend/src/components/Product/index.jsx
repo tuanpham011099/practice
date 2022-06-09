@@ -15,6 +15,7 @@ function Product(props) {
     useEffect(() => {
         axios.get('http://localhost:5000/products/' + id)
             .then(res => {
+                console.log(res.data);
                 setProduct(res.data);
                 res.data.images.map(item => item.is_default === true && setDefaultImg(item.href));
             })
@@ -27,10 +28,15 @@ function Product(props) {
     };
 
     const increaseAmount = () => {
-        setAmount(amount + 1);
+        if (amount == product.amount) return;
+        setAmount(Number(amount) + 1);
     };
 
     const addToCart = (quantity) => {
+        if (amount > product.amount) {
+            Swal.fire({ icon: 'error', text: 'Product quantity exceed!!!' });
+            return;
+        }
         let TOKEN;
         if (!localStorage.getItem('user'))
             navigate('/login');
@@ -50,7 +56,7 @@ function Product(props) {
                         <h3 className="title text-black uppercase roboto-slab">Product detail</h3>
                     </div>
                     <div className="overlay bg-opacity-5" />
-                    <img src="http://placehold.it/1920x800" alt="" className="img-responsive" /> </div>
+                    <img src="#" alt="" className="img-responsive" /> </div>
             </section>
             <section className="sec-padding">
                 <div className="container">
@@ -82,9 +88,11 @@ function Product(props) {
                             <br />
                             <p><strong>Description:</strong> {product.description} </p>
                             <br />
+                            <p><strong>Remain quantity:</strong> {product.amount} </p>
+                            <br />
                             <div className="form-group">
                                 <button onClick={decreaseAmount} className='btn btn-sm' style={{ background: '#bebebe' }} >-</button>
-                                <input type="number" name="quantity" className='quantityInput' min={1} value={amount} onChange={(e) => setAmount(e.target.value)} />
+                                <input type="number" name="quantity"  className='quantityInput' min={1} value={amount} max={product.amount} onChange={(e) => setAmount(e.target.value)} />
                                 <button onClick={increaseAmount} className='btn btn-sm' style={{ background: '#bebebe' }} >+</button>
                             </div>
                             <button className="btn btn-info" onClick={() => addToCart(amount)} >Add to cart</button>

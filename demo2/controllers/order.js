@@ -10,11 +10,18 @@ exports.listAllOrder = async (req, res) => {
     const limit = 10;
     try {
         const orders = await Order.findAll({
-            include: [{ model: User, as: 'user', attributes: ['id', 'email', 'fullName', 'address', 'phone'] }, {
+            include: [{
+                model: User, as: 'user',
+                attributes: ['id', 'email', 'fullName', 'address', 'phone']
+            }, {
                 model: productInOrder,
                 as: 'products',
-                attributes: ['quantity', 'total'],
-                include: [{ model: Product, as: 'details', attributes: ['id', 'description', 'price'] }]
+                attributes: ['quantity', 'total', 'price'],
+                include: [{
+                    model: Product,
+                    as: 'details',
+                    attributes: ['id', 'name', 'description', 'price']
+                }]
             }],
             order: [
                 ['createdAt', orderby],
@@ -42,7 +49,7 @@ exports.listAllOrder = async (req, res) => {
             };
         });
 
-        return res.status(200).json(result);
+        return res.status(200).json(orders);
     } catch (error) {
         console.log(error);
     }
@@ -127,8 +134,14 @@ exports.createOrder = async (req, res) => {
             model: cartProduct,
             as: 'products',
             attributes: ['quantity', 'cartId', 'id'],
-            include: [{ model: Product, as: 'details', attributes: ['id', 'name', 'description', 'amount', 'price'] }]
-        }, { model: User, as: 'user' }]
+            include: [{
+                model: Product,
+                as: 'details',
+                attributes: ['id', 'name', 'description', 'amount', 'price']
+            }]
+        },
+        { model: User, as: 'user' }
+        ]
     });
 
     let orders = [];
@@ -144,11 +157,12 @@ exports.createOrder = async (req, res) => {
             const order = await Order.create({ userId, status: PENDING_PAYMENT, completedDay, payment }, { transaction: t });
 
             const promises = [];
-
             items.products.forEach(product => {
-                // put infomation into an temporary object
+                if (product.quantity > product.details.amount) {
+                    t.rollback();
+                    return res.send({ message: 'Product quantity exceed', status: 400 });
+                }
                 let obj = {};
-                // create new promise with given object
                 const p = new Promise((resolve, reject) => {
                     obj['orderId'] = order.id;
                     obj['quantity'] = product.quantity;
@@ -157,9 +171,17 @@ exports.createOrder = async (req, res) => {
                     obj['productName'] = product.details.name;
                     obj['completedDay'] = completedDay;
                     obj['payment'] = payment;
+                    obj['price'] = product.details.price;
 
                     orders.push(obj);
-
+                    Product.findOne({ where: { id: product.details.id } })
+                        .then(result => {
+                            result.set({ amount: result.amount - product.quantity });
+                            result.save()
+                                .then(() => {
+                                    console.log('updated');
+                                });
+                        });
                     productInOrder.create(obj, { transaction: t })
                         .then(() => cartProduct.destroy({ where: { productId: product.details.id } }, { transaction: t }))
                         .then(() => resolve("done"))
@@ -173,15 +195,15 @@ exports.createOrder = async (req, res) => {
 
             await t.commit();
             await checkoutReminder(items.user.email, orders);
+            return res.status(200).json(orders);
         } else {
-
             return res.status(400).json({ msg: 'No product in cart' });
         }
     } catch (error) {
         await t.rollback();
-        res.send({ status: 400, message: error });
+        return res.send({ status: 400, message: error });
     }
-    res.status(200).json({ msg: 'Done', orders });
+
 };
 
 exports.orderDetail = async (req, res) => {

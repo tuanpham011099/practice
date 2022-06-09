@@ -10,18 +10,24 @@ function Product(props) {
 
     useEffect(() => {
         axios.get('http://localhost:5000/categories/' + id)
-            .then(res => { setCategory(res.data); setProducts(res.data.products); })
+            .then(res => { console.log(res.data); setCategory(res.data); setProducts(res.data.products); })
             .catch(console.error);
     }, [id]);
 
     return (
         <>
-            <div className="col-sm-12 ">
-                <h4 className="section-title-7"><span className="roboto-slab uppercase">{category.name}</span></h4>
-            </div>
-            {
-                products.map(product => <Item product={product} key={product.id} />)
-            }
+            <div className="container">
+                <div className="row w-100">
+                    <div className="col-sm-12 text-center">
+                        <h2 className="section-title-7"><span className="roboto-slab uppercase">{category.name}</span></h2>
+                    </div>
+                </div>
+                <div className="row">
+                    {
+                        products.map(product => <Item product={product} key={product.id} />)
+                    }
+                </div>
+           </div>
         </>
     );
 }

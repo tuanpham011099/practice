@@ -13,8 +13,8 @@ function Checkout(props) {
         let TOKEN = JSON.parse(localStorage.getItem('user')).token;
         axios.post(`http://localhost:5000/orders/${cartId}/checkout?payment=${payment}`, {}, {
             headers: { authorization: `Bearer ${TOKEN}` }
-        }).then(res => setOrders(res.data.orders))
-            .catch(error => Swal.fire({ icon: 'error', text: 'Error' }));
+        }).then(res => {  setOrders(res.data)})
+            .catch(error => Swal.fire({ icon: 'error', text: error }));
     }, []);
 
     return (
@@ -28,26 +28,30 @@ function Checkout(props) {
             <div className="row">
                 <div className="col-md-10 offset-md-1">
                     <table style={{ border: '1px solid grey' }}>
-                        <tr>
-                            <th>ID</th>
-                            <th>Payment method</th>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Total</th>
-                            <th>Complete day</th>
-                        </tr>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Payment method</th>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Complete day</th>
+                            </tr>
+                       </thead>
 
-                        {
-                            orders && orders.map(item =>
-                                <tr>
-                                    <td>{item.orderId}</td>
-                                    <td>{item.payment}</td>
-                                    <td>{item.productName}</td>
-                                    <td>{item.quantity}</td>
-                                    <td>${item.total}</td>
-                                    <td>${item.completedDay}</td>
-                                </tr>)
-                        }
+                        <tbody>
+                            {
+                                orders && orders.map(item =>
+                                    <tr key={item.orderId}>
+                                        <td>{item.orderId}</td>
+                                        <td>{item.payment}</td>
+                                        <td>{item.productName}</td>
+                                        <td>{item.quantity}</td>
+                                        <td>${item.total}</td>
+                                        <td>{item.completedDay}</td>
+                                    </tr>)
+                            }
+                       </tbody>
 
                     </table>
                 </div>

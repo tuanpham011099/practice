@@ -10,10 +10,15 @@ exports.listAllProduct = (req, res) => {
     const priceSort = req.query.price || 'ASC';
     const categoryName = req.query.category || '';
     const q = req.query.q || '';
-    const page = req.query.page || 1;
-    const limit = 2;
+    let page = 1;
+    if (q) {
+        page = 1;
+    } else {
+        page = req.query.page;
+    }
+    const limit = 5;
 
-    Product.findAll({
+    Product.findAndCountAll({
         where: {
             name: {
                 [Op.substring]: q
@@ -37,9 +42,10 @@ exports.listAllProduct = (req, res) => {
             ['name', name]
         ],
         offset: (page - 1) * limit,
-        limit
+        limit,
+        distinct: true
     }).then(result => res.status(200).json(result))
-        .catch(error => console.log(error));
+        .catch(error => res.status(400).json(error));
 };
 
 exports.productDetails = async (req, res) => {

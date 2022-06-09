@@ -16,20 +16,20 @@ router.delete('/:userId/block', banUser);
 router.post('/:userId/delete', deleteUser);
 
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
     done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
+passport.deserializeUser(function (id, done) {
     User.findByPk(id, { where: { role: ROLE_ADMIN } }).then(user => {
         done(null, user);
     }).catch(err => {
         console.log(err);
-    })
+    });
 });
 
 passport.use(new LocalStrategy({ usernameField: 'email' },
-    async function(email, password, done) {
+    async function (email, password, done) {
         const result = await User.findOne({ where: { email, role: ROLE_ADMIN } });
         if (!result) {
             return done(null, false, { message: 'Incorrect email.' });
@@ -44,9 +44,9 @@ passport.use(new LocalStrategy({ usernameField: 'email' },
 
 
 const Admin = (app) => {
-    app.get('/admin', async(req, res) => {
+    app.get('/admin', async (req, res) => {
         if (!req.isAuthenticated()) {
-            res.redirect('/admin/login')
+            res.redirect('/admin/login');
         } else {
 
             const categories = await Category.findAll({
@@ -66,7 +66,7 @@ const Admin = (app) => {
     });
 
     app.post('/admin/login', passport.authenticate('local'), (req, res) => {
-        res.redirect('/admin')
+        res.redirect('/admin');
     });
 
     app.get('/admin/logout', (req, res) => {
@@ -74,10 +74,12 @@ const Admin = (app) => {
         res.redirect('/admin/login');
     });
 
-    app.get('/admin/products', async(req, res) => {
+    app.get('/admin/products', async (req, res) => {
         if (!req.isAuthenticated())
             return res.redirect('/admin/login');
-        let categoryName = req.query.category || ' ';
+        let page = req.query.page > 0 ? req.query.page : 1;
+        const limit = 8;
+        console.log(page);
         const categories = await Category.findAll({
             attributes: [
                 'id',
@@ -95,7 +97,7 @@ const Admin = (app) => {
             }],
             group: ['Category.id']
         });
-        Product.findAll({
+        Product.findAndCountAll({
             include: [{
                 model: Category,
                 as: 'categories',
@@ -103,15 +105,21 @@ const Admin = (app) => {
                 through: {
                     attributes: []
                 },
-            }, { model: productImg, as: 'images', attributes: ['href', 'is_default'] }]
-        }).then(result =>
-           { console.log(result);
-            res.render('product', { products: result, user: req.user, categories: categories })})
+            }, {
+                model: productImg,
+                as: 'images',
+                attributes: ['href', 'is_default']
+            }],
+            limit,
+            offset: (page - 1) * limit
+        }).then(result => {
+            res.render('product', { products: result.rows, user: req.user, categories: categories, count: result.count, page });
+        })
             .catch(error => console.log(error));
 
     });
 
-    app.get('/admin/categories/:categoryId', async(req, res) => {
+    app.get('/admin/categories/:categoryId', async (req, res) => {
         if (!req.isAuthenticated()) return res.redirect('/admin/login');
         let id = req.params.categoryId;
         let categories = await Category.findAll({
@@ -123,14 +131,14 @@ const Admin = (app) => {
                 attributes: ['id', 'name', 'description', 'price', 'amount'],
                 include: [{ model: productImg, as: 'images', attributes: ['href', 'is_default'] }]
             }]
-        })
+        });
         let category = categories.filter(t => t.id == id);
-        res.render('category', { user: req.user, category: category[0], categories })
+        res.render('category', { user: req.user, category: category[0], categories });
 
 
     });
 
-    app.get('/admin/orders', async(req, res) => {
+    app.get('/admin/orders', async (req, res) => {
         if (!req.isAuthenticated()) return res.redirect('/admin/login');
         try {
             const categories = await Category.findAll({
@@ -145,7 +153,7 @@ const Admin = (app) => {
                 include: [{ model: User, as: 'user', attributes: ['id', 'email', 'fullName', 'address', 'phone'] }, {
                     model: productInOrder,
                     as: 'products',
-                    attributes: ['quantity', 'total'],
+                    attributes: ['quantity', 'total', 'price'],
                     include: [{ model: Product, as: 'details', attributes: ['id', 'description', 'price', 'name'] }]
                 }]
             });
@@ -173,7 +181,7 @@ const Admin = (app) => {
         }
     });
 
-    app.patch('/admin/order/:orderId', async(req, res) => {
+    app.patch('/admin/order/:orderId', async (req, res) => {
         const { orderId } = req.params;
         const { status } = req.body;
         const result = await Order.findByPk(orderId);
@@ -181,18 +189,17 @@ const Admin = (app) => {
             result.set({ status: COMPLETED_PAYMENT });
             result.set({ completedDay: formatDay(new Date()) });
         } else {
-            result.set({ status: PENDING_PAYMENT });
-            result.set({ completedDay: null });
+            return res.send({ message: 'Order is completed!', status: 400 });
         }
         try {
             await result.save();
-            res.status(200).json({ msg: 'Updated' });
+            res.send({ message: 'Updated!', status: 200 });
         } catch (error) {
-            res.status(400).json(error);
+            res.send({ message: error, status: 400 });
         }
     });
 
-    app.get('/admin/users', async(req, res) => {
+    app.get('/admin/users', async (req, res) => {
         if (!req.isAuthenticated()) return res.redirect('/admin/login');
         const categories = await Category.findAll({
             attributes: [
@@ -206,7 +213,7 @@ const Admin = (app) => {
             .catch(error => res.status(400).json(error));
     });
 
-    app.post('/admin/block/:id', async(req, res) => {
+    app.post('/admin/block/:id', async (req, res) => {
         const { id } = req.params;
         try {
             const result = await User.findByPk(id);
@@ -219,7 +226,7 @@ const Admin = (app) => {
         }
     });
 
-    app.delete('/admin/delete/:id', async(req, res) => {
+    app.delete('/admin/delete/:id', async (req, res) => {
         const { id } = req.params;
         try {
             const result = await User.findByPk(id, { where: { is_active: false } });
@@ -230,7 +237,7 @@ const Admin = (app) => {
         }
     });
 
-    app.get('/admin/edit/:productId', async(req, res) => {
+    app.get('/admin/edit/:productId', async (req, res) => {
         if (!req.isAuthenticated()) return res.redirect('/admin/login');
         const { productId } = req.params;
 
@@ -246,16 +253,16 @@ const Admin = (app) => {
             const result = await Product.findByPk(productId, {
                 include: [{ model: productImg, as: 'images' }]
             });
-            if (!result) return res.status(404).send('No product with this Id')
-            res.render('editProduct', { product: result, categories, user: req.user })
+            if (!result) return res.status(404).send('No product with this Id');
+            res.render('editProduct', { product: result, categories, user: req.user });
         } catch (error) {
-            res.status(400).send(error)
+            res.status(400).send(error);
         }
-    })
+    });
 
-    app.put('/admin/products/:id', async(req, res) => {
+    app.put('/admin/products/:id', async (req, res) => {
         const { id } = req.params;
-        const { name, price, description,amount } = req.body;
+        const { name, price, description, amount } = req.body;
         if (!name || !price || !description || !amount) res.send({ status: 400, message: 'Missing data' });
         const product = await Product.findByPk(id);
         if (!product) res.send({ status: 404, message: 'Product not found' });
@@ -268,32 +275,32 @@ const Admin = (app) => {
         }
     });
 
-    app.post('/admin/product/:productId', upload.array('images'), async(req, res) => {
+    app.post('/admin/product/:productId', upload.array('images'), async (req, res) => {
         const { productId } = req.params;
         if (!req.files) return res.send({ status: 400, message: 'No file provided' });
         try {
             for (let file of req.files) {
                 let x = await uploadImg(file.path);
-                await productImg.create({ productId, href: x })
+                await productImg.create({ productId, href: x });
             }
             res.send({ status: 200, message: 'Imgs Uploaded' });
         } catch (error) {
             res.send({ status: 400, message: error });
         }
-    })
+    });
 
-    app.delete('/admin/product/:productId/:imgId', async(req, res) => {
+    app.delete('/admin/product/:productId/:imgId', async (req, res) => {
         const { productId, imgId: id } = req.params;
         const result = await productImg.findOne({ where: { productId, id } });
         try {
             await result.destroy();
-            res.send({ status: 200, message: 'Image delete' })
+            res.send({ status: 200, message: 'Image delete' });
         } catch (error) {
-            res.send({ status: 400, message: error })
+            res.send({ status: 400, message: error });
         }
     });
 
-    app.patch('/admin/products/:productId/images/:imgId', async(req, res) => {
+    app.patch('/admin/products/:productId/images/:imgId', async (req, res) => {
         const { productId, imgId: id } = req.params;
         try {
             const result = await productImg.findAll({ where: { productId } });
@@ -311,8 +318,8 @@ const Admin = (app) => {
         }
     });
 
-    app.get('/admin/profile', async(req, res) => {
-        if (!req.isAuthenticated()) return res.redirect('/admin/login')
+    app.get('/admin/profile', async (req, res) => {
+        if (!req.isAuthenticated()) return res.redirect('/admin/login');
         const categories = await Category.findAll({
             attributes: [
                 'id',
@@ -324,7 +331,7 @@ const Admin = (app) => {
         res.render('editProfile', { user: req.user, categories });
     });
 
-    app.post('/admin/avatar', upload.single('avatar'), async(req, res) => {
+    app.post('/admin/avatar', upload.single('avatar'), async (req, res) => {
         const { id } = req.user;
         try {
             let avatar = await uploadImg(req.file.path);
@@ -338,7 +345,7 @@ const Admin = (app) => {
         }
     });
 
-    app.put('/admin/updateInfo', async(req, res) => {
+    app.put('/admin/updateInfo', async (req, res) => {
         const { fullName, address, phone, birthDay } = req.body;
         const { id } = req.user;
         if (!fullName || !address || !phone || !birthDay) return res.send({ status: 400, message: 'Invalid data' });
@@ -352,7 +359,7 @@ const Admin = (app) => {
         }
     });
 
-    app.patch('/admin/changePassword', async(req, res) => {
+    app.patch('/admin/changePassword', async (req, res) => {
         const { curr_pass, new_pass } = req.body;
         if (!curr_pass || !new_pass) return res.send({ status: 400, message: 'Missing data' });
         try {
@@ -370,30 +377,32 @@ const Admin = (app) => {
         }
     });
 
-    app.delete('/admin/product/:productId', async(req, res) => {
+    app.delete('/admin/product/:productId', async (req, res) => {
+        const t = await sequelize.transaction();
         const { productId } = req.params;
         try {
             const result = await Product.findByPk(productId);
-            const ctgProduct = await categoryProduct.findAll({ where: { productId } });
-            if (!result) return res.status(404).json({ msg: 'product not found' });
+            if (!result)
+                return res.status(404).json({ msg: 'product not found' });
+            await categoryProduct.destroy({ where: { productId } }, { transaction: t });
+
             const order = await productInOrder.findOne({ where: { productId } });
-            if (order) return res.status(400).json({ msg: 'Someone bought this product, cant deleted' });
-            const cart = cartProduct.findAll({ where: { productId } });
-            await result.destroy();
             if (order) {
-                await order.destroy();
+                await t.rollback();
+                return res.send({ status: 400, message: 'Someone bought this product, cant deleted' });
             }
-            if (cart)
-                await cart.destroy();
-            if (ctgProduct)
-                await ctgProduct.destroy();
-            res.status(200).json({ msg: `Product deleted` });
+
+            await cartProduct.destroy({ where: { productId } }, { transaction: t });
+            await result.destroy({ transaction: t });
+            await t.commit();
+            res.send({ status: 200, message: 'Product deleted' });
         } catch (error) {
-            console.log(error);
+            t.rollback();
+            res.send({ status: 400, message: error });
         }
     });
 
-    app.get('/admin/addCategory', async(req, res) => {
+    app.get('/admin/addCategory', async (req, res) => {
         if (!req.isAuthenticated()) {
             res.redirect('/admin/login');
         } else {
@@ -414,12 +423,12 @@ const Admin = (app) => {
                     attributes: []
                 }],
                 group: ['Category.id']
-            })
+            });
             res.render('addCtg', { user: req.user, categories: categories });
         }
     });
 
-    app.post('/admin/addCategory', upload.single('thumbnail'), async(req, res) => {
+    app.post('/admin/addCategory', upload.single('thumbnail'), async (req, res) => {
         const { name, description } = req.body;
         if (!name || !description) return res.send({ status: 400, message: 'Missing data' });
         const result = await Category.findOne({ where: { name } });
@@ -434,22 +443,23 @@ const Admin = (app) => {
         }
     });
 
-    app.delete('/admin/deleteCategory/:id', async(req, res) => {
+    app.delete('/admin/deleteCategory/:id', async (req, res) => {
+        const t = await sequelize.transaction();
         const { id } = req.params;
         try {
             const category = await Category.findByPk(id);
-            if (!category) return res.send({ status: 404, message: 'Product not found' });
-            const ctgProduct = await categoryProduct.findAll({ where: { categoryId: id } });
-            await category.destroy();
-            if (ctgProduct)
-                await ctgProduct.destroy();
+            if (!category) return res.send({ status: 404, message: 'Category not found' });
+            // const ctgProduct = await categoryProduct.findAll({ where: { categoryId: id } });
+            await categoryProduct.destroy({ where: { categoryId: id } }, { transaction: t });
+            await t.commit();
             res.send({ status: 200, message: 'Category delete' });
         } catch (error) {
-            res.send({ status: 400, message: error })
+            t.rollback();
+            res.send({ status: 400, message: error });
         }
-    })
+    });
 
-    app.get('/admin/addProduct', async(req, res) => {
+    app.get('/admin/addProduct', async (req, res) => {
         if (!req.isAuthenticated()) {
             res.redirect('/admin/login');
         } else {
@@ -467,7 +477,7 @@ const Admin = (app) => {
         }
     });
 
-    app.post('/admin/addProduct', upload.array('images'), async(req, res) => {
+    app.post('/admin/addProduct', upload.array('images'), async (req, res) => {
         const { name, description, price, amount, categories } = req.body;
         if (!name || !description || !price || !amount || !categories) return res.send({ status: 400, message: 'Missing data' });
         try {
@@ -486,8 +496,8 @@ const Admin = (app) => {
         }
     });
 
-    app.get('/admin/category/:id', async(rq, rs) => {
-        if (!rq.isAuthenticated()) return rs.redirect('/admin/login')
+    app.get('/admin/category/:id', async (rq, rs) => {
+        if (!rq.isAuthenticated()) return rs.redirect('/admin/login');
         try {
             const categories = await Category.findAll();
             let category = categories.filter(t => t.id == rq.params.id);
@@ -497,7 +507,7 @@ const Admin = (app) => {
         }
     });
 
-    app.patch('/admin/category/:id', async(req, res) => {
+    app.patch('/admin/category/:id', async (req, res) => {
         const { name, description } = req.body;
         if (!name || !description) return res.send({ status: 400, message: 'Missing data' });
         try {
@@ -505,25 +515,25 @@ const Admin = (app) => {
             if (!result) return res.send({ status: 404, message: 'Product not found' });
             result.set({ name, description });
             await result.save();
-            res.send({ status: 200, message: 'Category update' })
+            res.send({ status: 200, message: 'Category update' });
         } catch (error) {
-            res.send({ status: 400, message: error })
+            res.send({ status: 400, message: error });
         }
     });
 
 
-    app.patch('/admin/category/:id/changeImg', upload.single('thumbnail'), async(req, res) => {
+    app.patch('/admin/category/:id/changeImg', upload.single('thumbnail'), async (req, res) => {
         try {
             const result = await Category.findByPk(req.params.id);
             if (!req.file) return res.send({ status: 400, message: 'Provide Image' });
             let thumbnail = await uploadImg(req.file.path);
             result.set({ thumbnail });
             await result.save();
-            res.send({ status: 200, message: 'Thumbnail changed' })
+            res.send({ status: 200, message: 'Thumbnail changed' });
         } catch (error) {
-            res.send({ status: 400, message: error })
+            res.send({ status: 400, message: error });
         }
-    })
+    });
 };
 
-module.exports = { Admin, router }
+module.exports = { Admin, router };

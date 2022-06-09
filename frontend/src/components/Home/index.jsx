@@ -8,6 +8,8 @@ function Home({ q }) {
     const [products, setProducts] = useState([]);
     const [name, setName] = useState('ASC');
     const [price, setPrice] = useState('ASC');
+    const [count, setCount] = useState();
+    const [page, setPage] = useState(1);
 
     const onPriceSortChange = value => {
         setPrice(value);
@@ -16,12 +18,15 @@ function Home({ q }) {
         setName(value);
     };
 
+    const pageChange = value => {
+        setPage(value);
+    }
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/products?name=${name}&price=${price}&q=${q}`)
-            .then(res => setProducts(res.data))
+        axios.get(`http://localhost:5000/products?name=${name}&price=${price}&q=${q}&page=${page}`)
+            .then(res => { console.log(res.data); setProducts(res.data.rows); setCount(Math.ceil(res.data.count/5))})
             .catch(error => console.log(error));
-    }, [name, price, q]);
+    }, [name, price, q, page]);
 
     return (
         <div className="container">
@@ -46,6 +51,18 @@ function Home({ q }) {
             </div>
             <div className="row my-3">
                 {products.map(product => <Product product={product} key={product.id} />)}
+            </div>
+            <div className="row">
+                <nav aria-label="Page navigation">
+                    <ul className="pagination">
+                        {[...Array(count)].map((x, i) => 
+                            <li className="page-item" key={i}>
+                                <button className="btn page-link" disabled={page===i+1 ? true : false} onClick={() => pageChange(i + 1)}>{i + 1}</button>
+                            </li>
+                        )}
+                    </ul>
+                </nav>
+
             </div>
         </div>
 
